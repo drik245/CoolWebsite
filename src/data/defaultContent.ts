@@ -1,8 +1,8 @@
 import { AboutContent, Skill, Experience, TechStack, Category, TechStackCategory } from '../types';
 
 export const defaultAboutContent: AboutContent = {
-  name: 'Alex',
-  title: 'Electronics & Communication Engineer',
+  name: 'Drik',
+  title: 'Aspiring Engineer',
   bio: "I'm a passionate Electronics & Communication Engineer who thrives at the intersection of hardware and innovation, designing systems that connect and empower the world.",
   journey: "My journey in Electronics and Communication Engineering began over 4 years ago when I discovered the fascinating world of signals, circuits, and communication systems. What started as curiosity about how electronic devices work evolved into a deep passion for designing cutting-edge communication systems and embedded solutions.\n\nI specialize in RF design, signal processing, embedded systems, and wireless communication technologies. My approach focuses on innovative circuit design, efficient signal processing algorithms, and robust communication protocols.\n\nWhen I'm not working on circuit designs, you'll find me exploring the latest in 5G technology, IoT systems, experimenting with antenna designs, or contributing to open-source hardware projects that make communication technology more accessible and efficient.",
   contactEmail: 'hello@example.com',
