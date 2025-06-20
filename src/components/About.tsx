@@ -36,9 +36,7 @@ const About: React.FC<AboutProps> = ({ aboutContent, skills, experiences, techSt
           <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-300 to-purple-400 bg-clip-text text-transparent">
             About Me
           </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            {aboutContent.bio}
-          </p>
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto"></p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-16 items-start">
