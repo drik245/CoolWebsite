@@ -21,7 +21,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBack }) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Simple admin credentials (in production, this would be handled by a backend)
-    if (credentials.username === 'admin' && credentials.password === 'admin123') {
+    if (credentials.username === 'albert' && credentials.password === 'drik2456') {
       onLogin(true);
     } else {
       setError('Invalid credentials. Please try again.');
@@ -59,7 +59,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBack }) => {
               <Lock size={32} className="text-cyan-400" />
             </div>
             <h2 className="text-3xl font-bold text-white mb-2">Admin Access</h2>
-            <p className="text-gray-400">Enter your credentials to manage blog posts</p>
+            <p className="text-gray-400">Enter your credentials to manage site</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -133,11 +133,11 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onBack }) => {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-700/30 rounded-lg border border-gray-600/30">
+          {/*<div className="mt-6 p-4 bg-gray-700/30 rounded-lg border border-gray-600/30">
             <p className="text-sm text-gray-400 mb-2">Demo Credentials:</p>
             <p className="text-xs text-cyan-400">Username: admin</p>
             <p className="text-xs text-cyan-400">Password: admin123</p>
-          </div>
+          </div>*/}
         </div>
       </div>
     </div>
