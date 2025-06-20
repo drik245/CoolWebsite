@@ -12,10 +12,11 @@ const Hero: React.FC<HeroProps> = ({ aboutContent, onNavigate }) => {
   const [currentPhrase, setCurrentPhrase] = useState(0);
   
   const phrases = [
-    aboutContent.title || 'Full-Stack Developer',
+    aboutContent.title || 'Creative Technologist',
     'Digital Artist',
     'Tech Enthusiast',
-    'Problem Solver'
+    'Problem Solver',
+    'Just a curious human'
   ];
 
   useEffect(() => {
