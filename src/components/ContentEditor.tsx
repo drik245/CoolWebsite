@@ -30,6 +30,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
   const [formData, setFormData] = useState<any>({});
   const [editingItem, setEditingItem] = useState<any>(null);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     switch (type) {
@@ -54,12 +55,21 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
     }
   }, [type, aboutContent, skills, experiences, techStack, categories, techStackCategories]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (type === 'about') {
-      onSave(formData);
-    } else {
-      onSave(formData.items);
+    setSaving(true);
+    
+    try {
+      if (type === 'about') {
+        await onSave(formData);
+      } else {
+        await onSave(formData.items);
+      }
+    } catch (error) {
+      console.error('Error saving:', error);
+      alert('Error saving changes. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -366,17 +376,28 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 hover:text-white hover:border-gray-500 transition-all duration-300 flex items-center space-x-2"
+                disabled={saving}
+                className="px-6 py-3 border border-gray-600 rounded-lg text-gray-300 hover:text-white hover:border-gray-500 transition-all duration-300 flex items-center space-x-2 disabled:opacity-50"
               >
                 <X size={18} />
                 <span>Cancel</span>
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25 flex items-center space-x-2"
+                disabled={saving}
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25 flex items-center space-x-2 disabled:opacity-50 disabled:hover:scale-100"
               >
-                <Save size={18} />
-                <span>Save Changes</span>
+                {saving ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={18} />
+                    <span>Save Changes</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -513,15 +534,15 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
                 )}
 
                 {/* Tech Stack specific fields */}
-                {type === 'techstack' && (
+                {type === 'techstack' && techStackCategories && techStackCategories.length > 0 && (
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
                     <select
-                      value={editingItem.category || (techStackCategories?.[0]?.value || 'simulation')}
+                      value={editingItem.category || techStackCategories[0]?.value || ''}
                       onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
                       className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all"
                     >
-                      {techStackCategories?.map((cat) => (
+                      {techStackCategories.map((cat) => (
                         <option key={cat.value} value={cat.value}>{cat.name}</option>
                       ))}
                     </select>

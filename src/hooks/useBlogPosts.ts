@@ -1,55 +1,147 @@
 import { useState, useEffect } from 'react';
 import { BlogPost } from '../types';
-import { blogPosts as initialBlogPosts } from '../data/blogs';
+import { supabase } from '../lib/supabase';
 
 export const useBlogPosts = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load posts from localStorage or use initial data
-    const savedPosts = localStorage.getItem('blogPosts');
-    if (savedPosts) {
-      try {
-        setPosts(JSON.parse(savedPosts));
-      } catch (error) {
-        console.error('Error loading saved posts:', error);
-        setPosts(initialBlogPosts);
-      }
-    } else {
-      setPosts(initialBlogPosts);
-    }
+    fetchPosts();
   }, []);
 
-  const savePosts = (newPosts: BlogPost[]) => {
-    setPosts(newPosts);
-    localStorage.setItem('blogPosts', JSON.stringify(newPosts));
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedPosts: BlogPost[] = data.map(post => ({
+        id: post.id,
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        date: post.created_at,
+        category: post.category,
+        readTime: post.read_time,
+        featured: post.featured,
+        images: post.images || [],
+        videos: post.videos || []
+      }));
+
+      setPosts(formattedPosts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addPost = (postData: Omit<BlogPost, 'id'>) => {
-    const newPost: BlogPost = {
-      ...postData,
-      id: Math.max(...posts.map(p => p.id), 0) + 1,
-    };
-    const updatedPosts = [newPost, ...posts];
-    savePosts(updatedPosts);
+  const addPost = async (postData: Omit<BlogPost, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .insert({
+          title: postData.title,
+          excerpt: postData.excerpt,
+          content: postData.content,
+          category: postData.category,
+          read_time: postData.readTime,
+          featured: postData.featured,
+          images: postData.images || [],
+          videos: postData.videos || []
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newPost: BlogPost = {
+        id: data.id,
+        title: data.title,
+        excerpt: data.excerpt,
+        content: data.content,
+        date: data.created_at,
+        category: data.category,
+        readTime: data.read_time,
+        featured: data.featured,
+        images: data.images || [],
+        videos: data.videos || []
+      };
+
+      setPosts(prev => [newPost, ...prev]);
+    } catch (error) {
+      console.error('Error adding post:', error);
+      throw error;
+    }
   };
 
-  const updatePost = (id: number, postData: Omit<BlogPost, 'id'>) => {
-    const updatedPosts = posts.map(post =>
-      post.id === id ? { ...postData, id } : post
-    );
-    savePosts(updatedPosts);
+  const updatePost = async (id: number, postData: Omit<BlogPost, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .update({
+          title: postData.title,
+          excerpt: postData.excerpt,
+          content: postData.content,
+          category: postData.category,
+          read_time: postData.readTime,
+          featured: postData.featured,
+          images: postData.images || [],
+          videos: postData.videos || [],
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const updatedPost: BlogPost = {
+        id: data.id,
+        title: data.title,
+        excerpt: data.excerpt,
+        content: data.content,
+        date: data.created_at,
+        category: data.category,
+        readTime: data.read_time,
+        featured: data.featured,
+        images: data.images || [],
+        videos: data.videos || []
+      };
+
+      setPosts(prev => prev.map(post => post.id === id ? updatedPost : post));
+    } catch (error) {
+      console.error('Error updating post:', error);
+      throw error;
+    }
   };
 
-  const deletePost = (id: number) => {
-    const updatedPosts = posts.filter(post => post.id !== id);
-    savePosts(updatedPosts);
+  const deletePost = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setPosts(prev => prev.filter(post => post.id !== id));
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      throw error;
+    }
   };
 
   return {
     posts,
+    loading,
     addPost,
     updatePost,
     deletePost,
+    refetch: fetchPosts
   };
 };

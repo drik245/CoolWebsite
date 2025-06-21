@@ -25,7 +25,7 @@ function App() {
   const [currentPost, setCurrentPost] = useState<BlogPostType | null>(null);
   const [contentEditorType, setContentEditorType] = useState<ContentEditorType>('about');
   
-  const { posts, addPost, updatePost, deletePost } = useBlogPosts();
+  const { posts, loading: postsLoading, addPost, updatePost, deletePost } = useBlogPosts();
   const { 
     aboutContent, 
     skills, 
@@ -33,6 +33,7 @@ function App() {
     techStack, 
     categories,
     techStackCategories,
+    loading: contentLoading,
     updateAboutContent,
     updateSkills,
     updateExperiences,
@@ -119,14 +120,19 @@ function App() {
     setCurrentView('blog-editor');
   };
 
-  const handleSavePost = (postData: Omit<BlogPostType, 'id'>) => {
-    if (editingPost) {
-      updatePost(editingPost.id, postData);
-    } else {
-      addPost(postData);
+  const handleSavePost = async (postData: Omit<BlogPostType, 'id'>) => {
+    try {
+      if (editingPost) {
+        await updatePost(editingPost.id, postData);
+      } else {
+        await addPost(postData);
+      }
+      setCurrentView('admin-dashboard');
+      setEditingPost(null);
+    } catch (error) {
+      console.error('Error saving post:', error);
+      alert('Error saving post. Please try again.');
     }
-    setCurrentView('admin-dashboard');
-    setEditingPost(null);
   };
 
   const handleCancelEdit = () => {
@@ -160,33 +166,50 @@ function App() {
     setCurrentView('content-editor');
   };
 
-  const handleSaveContent = (data: any) => {
-    switch (contentEditorType) {
-      case 'about':
-        updateAboutContent(data);
-        break;
-      case 'skills':
-        updateSkills(data);
-        break;
-      case 'experiences':
-        updateExperiences(data);
-        break;
-      case 'techstack':
-        updateTechStack(data);
-        break;
-      case 'categories':
-        updateCategories(data);
-        break;
-      case 'techstack-categories':
-        updateTechStackCategories(data);
-        break;
+  const handleSaveContent = async (data: any) => {
+    try {
+      switch (contentEditorType) {
+        case 'about':
+          await updateAboutContent(data);
+          break;
+        case 'skills':
+          await updateSkills(data);
+          break;
+        case 'experiences':
+          await updateExperiences(data);
+          break;
+        case 'techstack':
+          await updateTechStack(data);
+          break;
+        case 'categories':
+          await updateCategories(data);
+          break;
+        case 'techstack-categories':
+          await updateTechStackCategories(data);
+          break;
+      }
+      setCurrentView('admin-dashboard');
+    } catch (error) {
+      console.error('Error saving content:', error);
+      throw error; // Re-throw to be handled by ContentEditor
     }
-    setCurrentView('admin-dashboard');
   };
 
   const handleCancelContentEdit = () => {
     setCurrentView('admin-dashboard');
   };
+
+  // Show loading state
+  if (contentLoading || postsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading portfolio...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Render different views
   if (currentView === 'admin-login') {
@@ -247,7 +270,6 @@ function App() {
   if (currentView === 'blog-post' && currentPost) {
     return (
       <BlogPost
-        
         post={currentPost}
         onBack={handleBackToBlog}
       />
